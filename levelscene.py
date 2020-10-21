@@ -15,6 +15,7 @@ import celltower
 import pygame
 import csv
 import tutorial
+from resources import resource_path
 
 class LevelScene(scene.Scene):
     def __init__(self, game, level=None):
@@ -24,14 +25,14 @@ class LevelScene(scene.Scene):
 
     def load(self):
         gx, gy = game.RES[0] // game.TILESIZE, game.RES[1] // game.TILESIZE
-        self.tilemap = tilemap.Tilemap(game.TILESIZE, gx, gy, pygame.image.load("assets/tiles.png").convert_alpha())
+        self.tilemap = tilemap.Tilemap(game.TILESIZE, gx, gy, pygame.image.load(resource_path("assets/tiles.png")).convert_alpha())
         self.background_group = pygame.sprite.Group()
         self.background_group.add(self.tilemap)
         self.game_group = pygame.sprite.LayeredUpdates()
         self.ui_group = pygame.sprite.Group()
         self.tutorial_group = pygame.sprite.Group()
 
-        self.worker_queue = tilemap.Tilemap(12, 20, 1, pygame.image.load("assets/workericon.png").convert_alpha())
+        self.worker_queue = tilemap.Tilemap(12, 20, 1, pygame.image.load(resource_path("assets/workericon.png")).convert_alpha())
         self.ui_group.add(self.worker_queue)
 
         self.animatedsprites = []
@@ -60,7 +61,7 @@ class LevelScene(scene.Scene):
         self.start_tile = None        
 
     def load_objects(self, filename):
-        with open(filename) as f:
+        with open(resource_path(filename)) as f:
             reader = csv.reader(f)
             for y,row in enumerate(reader):
                 for x,cell in enumerate(row):
@@ -110,7 +111,7 @@ class LevelScene(scene.Scene):
         self.object_grid[y][x] = o  
 
     def load_objects(self, filename):
-        with open(filename) as f:
+        with open(resource_path(filename)) as f:
             reader = csv.reader(f)
             for y,row in enumerate(reader):
                 for x,cell in enumerate(row):

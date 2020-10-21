@@ -1,9 +1,11 @@
 import json
+from resources import resource_path
+
 FILENAME = "save.json"
 class Save:
     def __init__(self):
         try:
-            data = json.load(open(FILENAME, "r"))
+            data = json.load(open(resource_path(FILENAME), "r"))
         except:
             data = {}
 
@@ -13,7 +15,7 @@ class Save:
         data = {
             'level_state': self.level_state
         }
-        json.dump(data, open(FILENAME, "w"))
+        json.dump(data, open(resource_path(FILENAME), "w"))
 
     def get_level_state(self, level_index):
         if level_index not in self.level_state:

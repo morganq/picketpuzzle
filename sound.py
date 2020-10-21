@@ -1,4 +1,5 @@
 import pygame
+from resources import resource_path
 
 SOUNDFILES = {
     'step0':'assets/Step0.wav',
@@ -12,7 +13,7 @@ SOUNDS = {}
 
 def init():
     for s,fn in SOUNDFILES.items():
-        SOUNDS[s] = pygame.mixer.Sound(fn)
+        SOUNDS[s] = pygame.mixer.Sound(resource_path(fn))
 
 def play(name):
     SOUNDS[name].play()

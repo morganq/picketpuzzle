@@ -1,10 +1,11 @@
 import pygame
+from resources import resource_path
 
 class FrameSprite(pygame.sprite.Sprite):
     type = None
     def __init__(self, sheet, width):
         pygame.sprite.Sprite.__init__(self)
-        self._sheet = pygame.image.load(sheet).convert_alpha()
+        self._sheet = pygame.image.load(resource_path(sheet)).convert_alpha()
         self._frame = 0
         self._frame_width = width
         self._update_image()

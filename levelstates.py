@@ -7,6 +7,7 @@ import csv
 import math
 import pygame
 import sound
+from resources import resource_path
 
 DIRS_FROM_OFFSETS = {
     (1,0):0, (0,1):1, (-1,0):2, (0,-1):3
@@ -336,8 +337,8 @@ class Edit(State):
     def save(self, name):
         w = len(self.scene.tilemap._grid[0])
         h = len(self.scene.tilemap._grid)
-        f1 = open("levels/%s_tiles.csv" % name, "w")
-        f2 = open("levels/%s_objects.csv" % name, "w")
+        f1 = open(resource_path("levels/%s_tiles.csv" % name), "w")
+        f2 = open(resource_path("levels/%s_objects.csv" % name), "w")
         tile_writer = csv.writer(f1)
         object_writer = csv.writer(f2)
         for y in range(h):

@@ -1,6 +1,7 @@
 import pygame
 import math
 import csv
+from resources import resource_path
 
 class Tilemap(pygame.sprite.Sprite):
     def __init__(self, tile_size, num_columns, num_rows, tile_images):
@@ -37,7 +38,7 @@ class Tilemap(pygame.sprite.Sprite):
         self.update_image()
 
     def load(self, filename):
-        with open(filename) as f:
+        with open(resource_path(filename)) as f:
             reader = csv.reader(f)
             for y,row in enumerate(reader):
                 for x,cell in enumerate(row):

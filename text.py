@@ -1,11 +1,12 @@
 import pygame
 import pygame.freetype
+from resources import resource_path
 
 pygame.freetype.init()
 
 FONTS = {
-    'small':pygame.freetype.Font("assets/Minecraftia-Regular.ttf", 8),
-    'big':pygame.freetype.Font("assets/upheavtt.ttf", 20)
+    'small':pygame.freetype.Font(resource_path("assets/Minecraftia-Regular.ttf"), 8),
+    'big':pygame.freetype.Font(resource_path("assets/upheavtt.ttf"), 20)
 }
 
 
