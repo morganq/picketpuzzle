@@ -1,0 +1,30 @@
+(done) Introduce worker and city hall
+(done) Introduce worker march
+(done) Have to take the right path to city hall bc blocked going backwards
+(done) Harder version of that - 30 [You don't have to bring out every factory worker]
+(done) Have to turn around in a small space - 25
+(done) Introduce multiple city hall spots (can't go to 0 marchers) - 45?
+(done) Harder turnaround 
+
+(done) Have to pick the right factory to start from - 30
+(done) Harder version of pick the right factory
+
+(done) Introduce police
+(done) Introduce stacked police - 25
+(done) you have to push police the correct way
+(done) Multi police lines
+(done) Police block
+
+(done) Police + Multiple city hall spots - 50/100
+...
+
+(done) Introduce soldiers
+(done) Introduce separate groups of soldiers
+(done) Soldiers + police
+(done) Awkward arrangement of soldiers
+(done) Harder soldiers + police
+
+(done) Push 2 cops around 87 / 100
+(Done) Cop Lock
+(done) Cop Lock 2 - 50/?
+(done) Tons of cops - 60/?
