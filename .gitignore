@@ -2,3 +2,7 @@
 .DS_Store
 env
 save.json
+build/
+dist/
+__pycache__
+*.spec
