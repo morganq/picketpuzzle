@@ -7,87 +7,88 @@ import random
 import text
 import levelscene
 import sound
+import tilemap
+from collections import defaultdict
+from resources import resource_path
 
 LEVELS = [
-    ('intro1', 'SEATTLE', 'The Port', (93, 139), 16, 20, 50),
-    ('intro2', 'SEATTLE', 'Industrial District', (243, 145), 32, 33, 50), # Simplify
-    ('intro3', 'SEATTLE', 'Intro 3', (243, 145), 50, 100, 120), # Simplify a bit
-    ('backandforth', 'SEATTLE', 'Back and Forth', (243, 145), 28, 30, 50),
-    ('multidrop', 'SEATTLE', 'Multidrop', (243, 145), 50, 100, 120), # make more interesting?
-    # Insert a simpler turnaround level
-    ('basicturnaround', 'OAKLAND', 'Basic Turnaround', (243, 145), 19, 50, 100), # simplify
-    ('extrafacts', 'OAKLAND', 'Extra Factories', (243, 145), 24, 30, 40),
-    ('turnaroundtiming', 'OAKLAND', 'Turnaround Timing', (243, 145), 26, 28, 40),
-    ('hardturnaround', 'OAKLAND', 'Hard Turnaround', (243, 145), 43, 50, 70),
-    ('simplepicker', 'OAKLAND', 'Simple Picker', (243, 145), 37, 40, 50),
-    ('harderpicker', 'SANTIAGO', 'Harder Picker', (243, 145), 58, 62, 120),
-    ('intropolice', 'SANTIAGO', 'Intro Police', (243, 145), 10, 12, 15),
-    ('policeline', 'SANTIAGO', 'Police Line', (243, 145), 25, 30, 40),
-    ('policemaneuver', 'SANTIAGO', 'Police Maneuver', (243, 145), 33, 100, 120),
-    ('policeavoid', 'SANTIAGO', 'Police Avoid', (243, 145), 40, 45, 50),
-    ('multipolice', 'BARCELONA', 'Multi Police', (243, 145), 34, 44, 54),
-    ('policeblock', 'BARCELONA', 'Police Block', (243, 145), 22, 25, 32),
-    ('policemultihall', 'BARCELONA', 'Police Multi Hall', (243, 145), 45, 50, 55),
-    ('introsoldier', 'BARCELONA', 'Intro Soldier', (243, 145), 29, 33, 36),
-    ('intromultisoldier', 'BARCELONA', 'Intro Multi Soldier', (243, 145), 63, 70, 85), 
-    ('awkwardsoldier', 'ALGIERS', 'Awkward Soldier', (243, 145), 45, 50, 55),
-    ('hardsoldierpolice', 'ALGIERS', 'Harder Soldier Police', (243, 145), 70, 80, 90),
-    ('complexmultisoldier', 'BARCELONA', 'Complex Multi Soldier', (243, 145), 63, 70, 85),
-    ('diagonalroute', 'ALGIERS', 'Diagonal Route', (243, 145), 49, 52, 75),
-    ('coplocks', 'ALGIERS', 'Cop Locks', (243, 145), 51, 58, 65),
-    ('coplock2', 'ALGIERS', 'Cop Locks 2', (243, 145), 50, 100, 120),
-    ('tonsofcops', 'ALGIERS', 'Tons of Cops', (243, 145), 50, 100, 120),
-    ('push2copsaround', 'MINSK', 'Push Police Around', (243, 145), 50, 100, 120),
-    ('complex1', 'MINSK', 'Complex 1', (243, 145), 50, 100, 120),
-    ('pods', 'MINSK', 'Pods', (243, 145), 58, 70, 85),
-    ('introtower', 'MINSK', 'Intro Tower', (243, 145), 50, 100, 120),
-    ('tower2', 'MINSK', 'Tower 2', (243, 145), 50, 100, 120),
-    # unstick police from corners or t-junction.
-    ('rearrangesoldiers', 'MINSK', 'Rearrange Soldiers', (0,0), (30, 40, 50)),
-    # Undo one-way police valve.
-    ('breakupcops', 'MINSK', 'Breakup Cops', (0,0), (59, 65, 90)),
-    ('twotowers', 'MINSK', 'Two Towers', (0,0), (35, 42, 50)),
-    ('towerring', 'MINSK', 'Tower Ring', (0,0), (60, 65, 70)),
-    ('towercomplex', 'MINSK', 'Tower Complex', (0,0), (50, 60, 70)),
-    ('twotowercomplex', 'MINSK', 'Two Tower Complex', (0,0), (50, 60, 70)),
-    ('dividesoldiers', 'MINSK', 'Divide Soldiers', (0,0), (50, 60, 70)),
-    ('complex2', 'MINSK', 'Complex 1', (243, 145), 50, 100, 120),
-    # Fancy complicated blocks of police can be managable, use up more than one worker to take multiple steps…
+    ('intro1', 'SEATTLE', 'The Port', (94, 118), 16, 20, 30),
+    ('intro2', 'SEATTLE', 'Industrial District', (114, 127), 32, 33, 40),
+    ('intro3', 'SEATTLE', 'Demonstration', (113, 88), 18, 25, 32), # May do drop-offs and not learn the lesson
+    ('intro4', 'SEATTLE', 'Downtown', (133, 87), 28, 35, 50), # good
+    ('backandforth', 'SEATTLE', 'Train Station', (156, 116), 28, 30, 50), # good
+    ('multidrop', 'SEATTLE', 'Sprawl', (180, 141), 29, 34, 40), # just more in depth than ^
+    ('introturnaround', 'OAKLAND', 'Roundabout', (55, 280), 48, 52, 55), # a bit tricky? 
+    ('basicturnaround', 'OAKLAND', 'Broadway', (96, 281), 19, 25, 35), # also a bit tricky - maybe later?
+    ('extrafacts', 'OAKLAND', 'Excess Capacity', (124, 300), 24, 30, 40), # no problem
+    ('simplepicker', 'OAKLAND', 'Convergence', (168, 335), 28, 35, 50), # good
+    ('harderpicker', 'OAKLAND', 'Residential', (215, 344), 58, 62, 120), # good one
+    ('intropolice', 'SANTIAGO', 'Police', (40, 477), 10, 12, 15), # ok... a bit weird to have the two there
+    ('policeline', 'SANTIAGO', 'Confrontation', (95, 488), 25, 30, 40), # I think good!
+    ('policemaneuver', 'SANTIAGO', 'Loop', (148, 541), 31, 34, 45), # good
+    ('policeavoid', 'SANTIAGO', 'Squad', (182, 510), 40, 45, 50), # subtle and important lesson
+    ('multipolice', 'SANTIAGO', 'Headquarters', (202, 496), 34, 44, 54), # not as tricky as it may look
+    ('policeblock', 'BARCELONA', 'Shortcut', (292, 286), 22, 25, 32), # yep good
+    ('introsoldier', 'BARCELONA', 'Soldiers', (327, 311), 29, 33, 36), # good
+    ('intromultisoldier', 'BARCELONA', 'Barracks', (359, 291), 33, 40, 45), # easy 
+    ('manyturnaround', 'BARCELONA', 'Park', (379, 320), 60, 65, 75), # 3-4
+    ('diagonalroute', 'BARCELONA', 'Hills', (384, 353), 49, 52, 75), # 4
+    ('awkwardsoldier', 'ALGIERS', 'Statue', (294, 509), 45, 50, 55), # 4 - maybe slightly too hard?
+    ('hardturnaround', 'ALGIERS', 'Alleyway', (339, 482), 43, 50, 70), # probably a bit hard
+    ('policemultihall', 'ALGIERS', 'Kettle', (380, 513), 45, 50, 55), #kinda hard
+    ('complexmultisoldier', 'ALGIERS', 'Infiltrate', (405, 488), 67, 75, 85), # 5
+    ('coplocks', 'ALGIERS', 'Tactical', (447, 480), 51, 58, 65), # 5
+    ('coplock2', 'MINSK', 'Lockdown', (324, 105), 50, 100, 120), # 5
+    ('introtower', 'MINSK', 'Cell Tower', (361, 122), 20, 25, 35), # good
+    ('tower2', 'MINSK', 'Dead End', (400, 111), 50, 100, 120), # good
+    ('rearrangesoldiers', 'MINSK', 'Operations', (460, 143), 30, 40, 50), # good    
+    ('push2copsaround', 'TEHRAN', 'Standoff', (548, 93), 50, 100, 120), # 5
+    ('pods', 'TEHRAN', 'Campus', (602, 130), 58, 70, 85), # 5
+    ('dividesoldiers', 'TEHRAN', 'Palace', (662, 90), 50, 60, 70), # 5
+    ('complex2', 'TEHRAN', 'Density', (693, 125), 50, 100, 120), # 5
+    ('towerring', 'MUMBAI', 'Ring', (590, 288), 60, 65, 70), # 5-6
+    ('hardsoldierpolice', 'MUMBAI', 'Parade', (615, 324), 70, 80, 90), # 6
+    ('breakupcops', 'MUMBAI', 'Commercial District', (662, 319), 59, 65, 90), # good - 6
+    ('complex1', 'MUMBAI', 'Fortification', (711, 346), 50, 100, 120),  # 7
+    ('twotowers', 'HONG KONG', 'Comms Center', (567, 532), 35, 42, 50),  # great - 7
+    ('twotowercomplex', 'HONG KONG', 'Broadcast', (626, 479), 50, 60, 70), # 7
+    ('towercomplex', 'HONG KONG', 'City Square', (674, 477), 50, 60, 70), # 7
+    ('tonsofcops', 'HONG KONG', 'Police Riot', (691, 537), 50, 100, 120), # 8
 ]
-# SEATTLE, OAKLAND, SANTIAGO, BARCELONA, ALGIERS, MINSK, TEHRAN, MUMBAI, HONG KONG, BEIJING
+# SEATTLE, OAKLAND, SANTIAGO, BARCELONA, ALGIERS, MINSK, TEHRAN, MUMBAI, HONG KONG, NEW YORK CITY
 
-print(len(LEVELS))
-
-for i,l in enumerate(LEVELS):
-    row = list(LEVELS[i])
-    row[3] = (93 + i * 30, 139)
-    LEVELS[i] = row
-
-
-MAP_SPOTS = []
-for y in range(5):
-    MAP_SPOTS.append([])
-    for x in range(10):
-        MAP_SPOTS[-1].append((x * 110 + 30, y * 90 + 30))
-    
+SCROLLS = {
+    'SEATTLE': (11,9),
+    'OAKLAND': (11,204),
+    'SANTIAGO': (10,401),
+    'BARCELONA': (262,205),
+    'ALGIERS': (262,401),
+    'MINSK': (262,9),
+    'TEHRAN': (513,9),
+    'MUMBAI': (513,204),
+    'HONG KONG': (513,401),
+    'NEW YORK CITY': (766,204)
+}
+CITIES = list(SCROLLS.keys())
 
 class WorldMapScene(scene.Scene):
     def __init__(self, game, level_index):
         scene.Scene.__init__(self, game)
         self.starting_level_index = level_index or 0
-
+        self.animated = []
+        self.animation_timer = 0
 
     def start(self):
         self.scroll = (0,0)
         self.back_group = pygame.sprite.Group()
         self.fore_group = pygame.sprite.Group()
         self.levelobjs = []
-        self.map = simplesprite.SimpleSprite("assets/worldmap.png", (0,0))
+        self.map = simplesprite.SimpleSprite("assets/worldmaplayout.png", (0,0))
         self.back_group.add(self.map)
 
         for i,level in enumerate(LEVELS):
             x,y = level[3][0], level[3][1]
-            obj = framesprite.FrameSprite("assets/mapflag.png", 12)
+            obj = framesprite.FrameSprite("assets/cityhall.png", 12)
             if self.game.save.get_level_state(i)['beaten']:
                 obj.set_frame(1)
             obj.move(x - 6,y - 10)
@@ -96,14 +97,22 @@ class WorldMapScene(scene.Scene):
 
         self.popup_sprites = []
 
-        arrow = framesprite.FrameSprite("assets/selectarrow.png", 9)
-        arrow.move(117, 136)
-        self.fore_group.add(arrow)
+        self.arrow = framesprite.FrameSprite("assets/selectarrow.png", 11)
+        self.arrow.move(-11, -11)
+        self.animated.append(self.arrow)
+        self.fore_group.add(self.arrow)
+
+        self.next_text = text.Text(">", "small", (0,-20))
+        self.prev_text = text.Text("<", "small", (0,-20))
+        self.fore_group.add(self.next_text)
+        self.fore_group.add(self.prev_text)
 
         overlay = simplesprite.SimpleSprite("assets/mapoverlay.png", (0,0))
         self.fore_group.add(overlay)
         self.selected_level = self.starting_level_index
         self.update_selection()
+        self.flash_index = 0
+        sound.play_music('overworld')
 
     def render(self):
         self.game.screen.fill(game.BGCOLOR)
@@ -114,8 +123,8 @@ class WorldMapScene(scene.Scene):
 
     def update_selection(self):
         (lvl, name1, name2, pos, *extras) = LEVELS[self.selected_level]
-
-        self.scroll = (pos[0] - 120, pos[1] - 130)
+        self.scroll = SCROLLS[name1]
+        self.arrow.move(pos[0] - self.scroll[0] -13, pos[1] - self.scroll[1] - 18)
 
         self.back_group.remove(self.popup_sprites)
         self.popup_sprites = []
@@ -124,13 +133,16 @@ class WorldMapScene(scene.Scene):
         w,h = (text.FONTS['big'].get_rect(name1)[2] + 12, 50)
         w2 = text.FONTS['small'].get_rect(name2)[2] + 12
         w = max(w, w2, 120)
-        x = self.scroll[0] + 120 - w / 2
+        fw = w + 43
+        x = self.scroll[0] + 120 - fw / 2
         city = text.Text(name1, "big", (x + 5, y + 5), color=(game.BGCOLOR), border=False)
         background = pygame.sprite.Sprite()
         
-        background.image = pygame.Surface((w,h))
+        background.image = pygame.Surface((fw,h))
         background.rect = (x, y, background.image.get_size()[0] + 10, background.image.get_size()[1])
-        background.image.fill((247, 249, 223))
+        background.image.fill(game.FGCOLOR)
+        pygame.draw.rect(background.image, game.FGCOLOR, (0, 0, w, h))
+        pygame.draw.rect(background.image, game.BGCOLOR, (w, 1, fw-w-1, h-2))
         pygame.draw.rect(background.image, game.BGCOLOR, (1,1, w-2, h-2), 1)
         desc = text.Text(name2, "small", (x+5, y+21), color=(game.BGCOLOR), border=False)
 
@@ -153,7 +165,41 @@ class WorldMapScene(scene.Scene):
             steps = text.Text(steptext, "small", (x + w - 6 - stepwidth, y + 35), color=(game.BGCOLOR),border=False)
             self.popup_sprites.append(steps)
 
-        self.back_group.add(self.popup_sprites)        
+        self.make_minimap(x + w, y + 7)
+
+        self.back_group.add(self.popup_sprites)
+
+        city_index = CITIES.index(name1)
+        if name1 == CITIES[0]:
+            self.prev_text.set_pos(0, -20)
+        else:
+            self.prev_text.set_text("< " + CITIES[city_index - 1])
+            self.prev_text.set_pos(5, 160)
+        if name1 == CITIES[-1]:
+            self.next_text.set_pos(0, -20)
+        else:
+            self.next_text.set_text(CITIES[city_index + 1] + " >")
+            self.next_text.set_pos(235 - self.next_text.rect[2], 160)
+
+
+
+    def make_minimap(self, x, y):
+        background = pygame.sprite.Sprite()
+        
+        background.image = pygame.Surface((42,34))
+        background.rect = (x, y, 42, 34)
+        background.image.fill(game.BGCOLOR)
+        self.popup_sprites.append(background)
+
+        ts = tilemap.Tilemap(2, 20, 16, pygame.image.load(resource_path('assets/minitiles.png')))
+        ts.load(resource_path('levels/%s_tiles.csv' % LEVELS[self.selected_level][0]))
+        ts.rect = (x + 1, y + 1, ts.rect[2], ts.rect[3])
+        self.popup_sprites.append(ts)
+
+        ts = tilemap.Tilemap(2, 20, 16, pygame.image.load(resource_path('assets/miniobjects.png')), use_zero=True)
+        ts.load(resource_path('levels/%s_objects.csv' % LEVELS[self.selected_level][0]))
+        ts.rect = (x + 1, y + 1, ts.rect[2], ts.rect[3])
+        self.popup_sprites.append(ts)    
 
     def take_input(self, inp, event):
         if inp == "right":
@@ -170,7 +216,10 @@ class WorldMapScene(scene.Scene):
             sound.play("step2")
             self.game.start_level(LEVELS[self.selected_level][0], self.selected_level)
 
-        elif inp == "other":
+        elif inp == "click":
+            print((event.pos[0] // game.SCALE + self.scroll[0], event.pos[1] // game.SCALE + self.scroll[1]))
+
+        elif inp == "other" and game.DEV:
             if event.key == pygame.K_c:
                 self.game.save.level_state = {}
                 
@@ -181,3 +230,15 @@ class WorldMapScene(scene.Scene):
                 self.game.save.save()
                 self.game.return_to_map()
                 
+    def update(self, dt):
+        scene.Scene.update(self, dt)
+        self.animation_timer += dt
+        if self.animation_timer > 0.38:
+            self.animation_timer -= 0.38
+            for sprite in self.animated:
+                sprite.step_animation() 
+            self.flash_index = (self.flash_index + 1) % 2
+            self.next_text.color = [(247, 249, 223), (255, 213, 17)][self.flash_index]
+            self.next_text.update()
+            self.prev_text.color = [(247, 249, 223), (255, 213, 17)][self.flash_index]
+            self.prev_text.update()

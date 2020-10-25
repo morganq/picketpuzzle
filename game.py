@@ -12,11 +12,15 @@ import worker
 import starttile
 import levelscene
 import worldmapscene
+import alphascene
+from resources import resource_path
 import sys
 
-SCALE = 4
+DEV = False
+SCALE = 3
 RES = (240,192)
 BGCOLOR = (42,17,81)
+FGCOLOR = (247,249,223)
 TILESIZE = 12
 DIRS_FROM_OFFSETS = {
     (1,0):0, (0,1):1, (-1,0):2, (0,-1):3
@@ -29,20 +33,23 @@ OBJ = {
     'police': 2,
     'soldier': 3,
     'start': 4,
-    'celltower': 5
+    'celltower': 5,
+    'tank': 6
 }
 class Game:
     def __init__(self, save):
+        pygame.display.set_icon(pygame.image.load(resource_path("assets/icon_2_256.png")))
         pygame.mixer.pre_init(buffer=256)
         pygame.init()
-        sound.init()
         self.save = save
         self.scaled_screen = pygame.display.set_mode((RES[0] * SCALE, RES[1] * SCALE))
+        pygame.display.set_caption("Picket Puzzle")
+        sound.init()
         self.screen = pygame.Surface(RES)
-        if len(sys.argv) > 1:
+        if len(sys.argv) > 1 and DEV:
             self.scene = levelscene.LevelScene(self, sys.argv[1])
         else:
-            self.scene = worldmapscene.WorldMapScene(self, 0)
+            self.scene = alphascene.AlphaScene(self)
         self.playing_level_index = None
 
     def run(self):
@@ -52,6 +59,9 @@ class Game:
 
         while running:
             for event in pygame.event.get():
+                if event.type == sound.MUSIC_ENDEVENT:
+                    sound.end_of_music()
+
                 if event.type == pygame.QUIT:
                     running = False
 
@@ -65,7 +75,7 @@ class Game:
                     else:
                         self.scene.take_input("other", event)
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.type == pygame.MOUSEBUTTONDOWN and DEV:
                     if event.button == 1: self.scene.take_input("click", event)
                     if event.button == 3: self.scene.take_input("rightclick", event)
 
@@ -89,16 +99,23 @@ class Game:
         self.scene = worldmapscene.WorldMapScene(self, self.playing_level_index)
         self.scene.start()
             
+    def get_max_steps(self):
+        if self.playing_level_index is not None:
+            level = worldmapscene.LEVELS[self.playing_level_index]
+            return level[6]
+        else:
+            return 0        
+
     def record_victory(self, steps):
         if self.playing_level_index is not None:
             level = worldmapscene.LEVELS[self.playing_level_index]
             s3, s2, s1 = level[4:]
-            print(s3,s2,s1)
+            print(steps, s3,s2,s1)
             stars = 0
             if steps <= s3: stars = 3
             elif steps <= s2: stars = 2
             elif steps <= s1: stars = 1
             old_state = self.save.get_level_state(self.playing_level_index)
-            if not old_state['beaten'] or stars > old_state['stars']:
+            if not old_state['beaten'] or steps < old_state['steps']:
                 self.save.set_level_state(self.playing_level_index, True, steps, stars)
                 self.save.save()

@@ -13,9 +13,13 @@ import starttile
 import levelscene
 import celltower
 import pygame
+import tank
 import csv
+import framesprite
 import tutorial
+import sound
 from resources import resource_path
+import traceback
 
 class LevelScene(scene.Scene):
     def __init__(self, game, level=None):
@@ -32,7 +36,11 @@ class LevelScene(scene.Scene):
         self.ui_group = pygame.sprite.Group()
         self.tutorial_group = pygame.sprite.Group()
 
+        self.tanks = []
+        self.overlay = framesprite.FrameSprite("assets/gameoverlay.png", 240)
+        self.ui_group.add(self.overlay)        
         self.worker_queue = tilemap.Tilemap(12, 20, 1, pygame.image.load(resource_path("assets/workericon.png")).convert_alpha())
+        self.worker_queue.rect = (2, 1, 240, 12)
         self.ui_group.add(self.worker_queue)
 
         self.animatedsprites = []
@@ -52,26 +60,13 @@ class LevelScene(scene.Scene):
             self.tilemap.load("levels/%s_tiles.csv" % self.level_file)
             self.load_objects("levels/%s_objects.csv" % self.level_file)
         except Exception as e:
-            print(e)
+            traceback.print_exc()
             self.tilemap.load("levels/empty_tiles.csv")
             self.load_objects("levels/empty_objects.csv")
             self.level_file = "empty"
 
         self.queued_workers = 0
         self.start_tile = None        
-
-    def load_objects(self, filename):
-        with open(resource_path(filename)) as f:
-            reader = csv.reader(f)
-            for y,row in enumerate(reader):
-                for x,cell in enumerate(row):
-                    cell = int(cell)
-                    o = None
-                    tmd = self.tilemap._grid[y][x]
-                    self.place_obj_by_index(cell, x, y)
-
-                    if tmd in game.ROADTILES:
-                        self.road_grid[y][x] = True
 
     def place_obj_by_index(self, index, x, y):
         o = None
@@ -92,25 +87,39 @@ class LevelScene(scene.Scene):
             o = police.Police(x, y)
             self.game_group.add(o)
             self.animatedsprites.append(o)
+            o.set_starting_dir(self.road_grid)
 
         elif index == game.OBJ['soldier']: # Soldier
             o = soldier.Soldier(x, y)
             self.game_group.add(o)
             self.animatedsprites.append(o)
+            o.set_starting_dir(self.road_grid)
 
         elif index == game.OBJ['start']: #Starting tile
             o = starttile.StartTile(x, y)
             self.game_group.add(o)
             self.animatedsprites.append(o)
 
-        elif index == game.OBJ['celltower']: #Starting tile
+        elif index == game.OBJ['celltower']: 
             o = celltower.CellTower(x, y)
             self.game_group.add(o)
             self.animatedsprites.append(o)            
 
+        elif index == game.OBJ['tank']:
+            o = tank.Tank(x,y)
+            self.game_group.add(o)
+            self.animatedsprites.append(o)
+            self.tanks.append(o)
+            o.set_starting_dir(self.road_grid)
+
         self.object_grid[y][x] = o  
 
     def load_objects(self, filename):
+        for y,row in enumerate(self.tilemap._grid):
+            for x,cell in enumerate(row):
+                if cell in game.ROADTILES:
+                    self.road_grid[y][x] = True
+
         with open(resource_path(filename)) as f:
             reader = csv.reader(f)
             for y,row in enumerate(reader):
@@ -118,10 +127,7 @@ class LevelScene(scene.Scene):
                     cell = int(cell)
                     o = None
                     tmd = self.tilemap._grid[y][x]
-                    self.place_obj_by_index(cell, x, y)
-
-                    if tmd in game.ROADTILES:
-                        self.road_grid[y][x] = True        
+                    self.place_obj_by_index(cell, x, y)   
 
 
     def add_queued_worker(self):
@@ -160,13 +166,14 @@ class LevelScene(scene.Scene):
 
     def start(self):
         self.load()
-        self.initialize_state()        
+        self.initialize_state()      
+        sound.play_music('game')  
 
     def update(self, dt):
         scene.Scene.update(self, dt)
         self.animation_timer += dt
-        if self.animation_timer > 0.65:
-            self.animation_timer -= 0.65
+        if self.animation_timer > 0.38:
+            self.animation_timer -= 0.38
             for sprite in self.animatedsprites:
                 sprite.step_animation()        
 

@@ -1,5 +1,6 @@
 import pygame
 import character
+import sound
 
 class Soldier(character.Character):
     def __init__(self, gx, gy):
@@ -43,8 +44,13 @@ class Soldier(character.Character):
                     enough_workers = False
 
             if enough_workers:
+                sound.play("soldier")
                 for s in contig:
                     s.kill()
                     state.scene.animatedsprites.remove(s)
                     state.scene.object_grid[s.gy][s.gx] = None
                     state.scene.add_queued_worker()
+            else:
+                sound.play("cannot")
+        else:
+            sound.play("cannot")

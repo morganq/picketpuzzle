@@ -13,7 +13,7 @@ class Character(framesprite.FrameSprite):
         framesprite.FrameSprite.__init__(self, sheet, width)
         self.rect = (x, y - 6, width, self._sheet.get_size()[1])
         self.activated = False
-        self.last_move_direction = 0#random.randint(0,min(4, self._sheet.get_size()[0] // width))
+        self.last_move_direction = random.randint(0,min(4, self._sheet.get_size()[0] // width // 2) - 1)
         self.step_animation()
 
     def step_animation(self):
@@ -30,3 +30,14 @@ class Character(framesprite.FrameSprite):
 
     def try_push(self, state, offset):
         pass
+
+    def set_starting_dir(self, roads):
+        if roads[self.gy][self.gx-1]:
+            self.last_move_direction = 2
+        elif roads[self.gy][self.gx+1]:
+            self.last_move_direction = 0
+        elif roads[self.gy+1][self.gx]:
+            self.last_move_direction = 1
+        elif roads[self.gy-1][self.gx]:
+            self.last_move_direction = 3
+        self.update_direction()

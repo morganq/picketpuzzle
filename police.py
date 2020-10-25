@@ -1,5 +1,6 @@
 import pygame
 import character
+import sound
 import game
 
 class Police(character.Character):
@@ -34,6 +35,7 @@ class Police(character.Character):
             check = (check[0] + offset[0], check[1] + offset[1])
 
         if len(to_push) > len(state.scene.snake) + state.scene.queued_workers:
+            sound.play("cannot")
             return False
 
         for obj in to_push:
@@ -47,7 +49,8 @@ class Police(character.Character):
             obj.step_animation()
             state.scene.object_grid[obj.gy][obj.gx] = obj
             
-        
+        if len(to_push) == 0:
+            sound.play("cannot")
         return len(to_push) > 0
 
                 

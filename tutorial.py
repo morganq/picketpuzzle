@@ -8,7 +8,7 @@ class TutorialPopup:
         self.width = 0
         self.height = 0
         self.running_y = 0
-        self.y_offset = 142
+        self.y_offset = 132
 
     def add_text(self, s):
         words = s.split(" ")
@@ -63,22 +63,22 @@ class TutorialPopup:
 class Intro1Tutorial(TutorialPopup):
     def build(self):
         self.add_text("Use the arrow keys to march.")
-        self.add_text("Reach the government building, and occupy it by walking towards it.")
+        self.add_text("Head over to the government building, and occupy it to win.")
         
 class Intro2Tutorial(TutorialPopup):
     def build(self):
-        self.add_text("Walk into a factory to add workers to the march.")
+        self.add_text("Visit each factory to add workers to the march.")
         self.add_text("Every government building must be occupied to win.")
 
 class Intro3Tutorial(TutorialPopup):
     def build(self):
-        self.add_text("When you have multiple workers marching, you can not backtrack.")
-        self.add_text("So, be smart about your path!")
+        self.add_text("When you have more than one worker marching, you can not backtrack.")
+        self.add_text("So be smart about your path!")
 
 class ExtraFactsTutorial(TutorialPopup):
     def build(self):
         self.add_text("Sometimes, you may not need every worker available to get the job done.")
-        self.add_text("Try to find the quickest route to victory!")
+        self.add_text("Try to find the quickest route!")
 
 class SimplePickerTutorial(TutorialPopup):
     def build(self):
@@ -90,13 +90,13 @@ class IntroPoliceTutorial(TutorialPopup):
 
 class PoliceLineTutorial(TutorialPopup):
     def build(self):
-        self.add_text("A line of police can still be pushed, if you match their forces.")
+        self.add_text("A line of Police can still be pushed, if your forces match theirs.")
 
 class IntroSoldierTutorial(TutorialPopup):
     def build(self):
         self.y_offset = 54
         self.add_text("Soldiers can't be moved, but they can be won over.")
-        self.add_text("If each soldier in a group is next to a worker, you can recruit the whole group!")
+        self.add_text("If there's a worker standing next to each Soldier in a group, you can recruit them all!")
 
 class IntroTowerTutorial(TutorialPopup):
     def build(self):

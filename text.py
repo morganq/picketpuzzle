@@ -6,7 +6,8 @@ pygame.freetype.init()
 
 FONTS = {
     'small':pygame.freetype.Font(resource_path("assets/Minecraftia-Regular.ttf"), 8),
-    'big':pygame.freetype.Font(resource_path("assets/upheavtt.ttf"), 20)
+    'big':pygame.freetype.Font(resource_path("assets/upheavtt.ttf"), 20),
+    'huge':pygame.freetype.Font(resource_path("assets/upheavtt.ttf"), 30)
 }
 
 
@@ -25,9 +26,11 @@ class Text(pygame.sprite.Sprite):
         self.border = border
         self.set_text(text)
         
-
     def set_text(self, text):
         self._text = text
+        self.update()
+
+    def update(self):
         f = FONTS[self.size]
         r = f.get_rect(self._text)
         self.image = pygame.Surface((r[2] + 2, r[3] + 2), flags=pygame.SRCALPHA)

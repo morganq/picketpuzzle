@@ -4,13 +4,14 @@ import csv
 from resources import resource_path
 
 class Tilemap(pygame.sprite.Sprite):
-    def __init__(self, tile_size, num_columns, num_rows, tile_images):
+    def __init__(self, tile_size, num_columns, num_rows, tile_images, use_zero = False):
         pygame.sprite.Sprite.__init__(self)
 
         self.tile_size = tile_size
         self.num_columns = num_columns
         self.num_rows = num_rows
         self.tile_images = tile_images
+        self.use_zero = use_zero
 
         self.image = pygame.Surface((self.tile_size * self.num_columns, self.tile_size * self.num_rows), flags=pygame.SRCALPHA)
         self.rect = self.image.get_rect()
@@ -29,7 +30,7 @@ class Tilemap(pygame.sprite.Sprite):
         for row in range(self.num_rows):
             self._grid.append([])
             for col in range(self.num_columns):
-                self._grid[-1].append(0)
+                self._grid[-1].append(-1)
 
         self._dirty_rects = [pygame.Rect(
                 0, 0,
@@ -42,7 +43,7 @@ class Tilemap(pygame.sprite.Sprite):
             reader = csv.reader(f)
             for y,row in enumerate(reader):
                 for x,cell in enumerate(row):
-                    if cell == -1: cell = 0
+                    #if cell == -1: cell = 0
                     self._grid[y][x] = int(cell)
         self._dirty_rects = [pygame.Rect(
                 0, 0,
@@ -83,7 +84,7 @@ class Tilemap(pygame.sprite.Sprite):
 
     def paint_tile(self, x, y):
         tile_index = self._grid[y][x]
-        if tile_index == 0:
+        if tile_index == -1 or (tile_index == 0 and not self.use_zero):
             return
         self.image.blit(
             self.tile_images, # Source

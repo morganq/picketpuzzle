@@ -96,6 +96,8 @@ class March(State):
         self.scene.ui_group.add(self.cell_arrow)
         self.scene.animatedsprites.append(self.cell_arrow)
 
+        self.update_steps()
+
     def position_extras(self):
         self.flag.rect = (self.scene.snake[0].rect[0] - 2, self.scene.snake[0].rect[1] - 7, self.flag.rect[2], self.flag.rect[3])
         self.steps.set_pos(self.scene.snake[0].rect[0] + 9, self.scene.snake[0].rect[1] - 4)
@@ -149,9 +151,13 @@ class March(State):
         if moved:
             self.enemies_to_control.pop(0)
             if self.enemies_to_control:
+                sound.play("cell")
                 self.cell_arrow.move(self.enemies_to_control[0].rect[0] + 2, self.enemies_to_control[0].rect[1] - 10)
             else:
                 self.cell_arrow.move(-10, -10)
+                self.scene.overlay.set_frame(0)
+        else:
+            sound.play("cannot")
             
 
     def activate_tower(self, tower):
@@ -166,6 +172,8 @@ class March(State):
         self.enemies_to_control = enemies
         if self.enemies_to_control:
             self.cell_arrow.move(self.enemies_to_control[0].rect[0] + 2, self.enemies_to_control[0].rect[1] - 10)
+            sound.play("cell")
+            self.scene.overlay.set_frame(1)
 
 
     def try_move(self, tx, ty, dir):
@@ -178,6 +186,7 @@ class March(State):
         o = self.scene.object_grid[ty][tx]
         if o == None:
             self.move(tx, ty, dir)
+            self.move_tanks()
         else:
             did_push = o.interact(self, w)
             if len(self.scene.snake) == 0:
@@ -188,6 +197,11 @@ class March(State):
                 return
             if did_push:
                 self.move(tx, ty, dir)
+                self.move_tanks()
+
+    def move_tanks(self):
+        for tank in self.scene.tanks:
+            tank.step()
 
 
     def move(self, tx, ty, dir):
@@ -198,6 +212,7 @@ class March(State):
                 # Check if we're trying to double-back and we have a tail
                 if len(self.scene.snake) > 1:
                     if self.scene.snake[1].gx == tx and self.scene.snake[1].gy == ty:
+                        sound.play("cannot")
                         return # Don't move
 
                 # Figure out the positions of the new snake
@@ -236,21 +251,36 @@ class March(State):
                         self.scene.snake.append(add_worker)
 
                     self.num_steps += 1
-                    self.steps.set_text(str(self.num_steps))      
+                    self.update_steps()
                     if len(self.scene.snake) > 2:
                         sound.play("step2")
                     elif len(self.scene.snake) > 1:
                         sound.play("step1")
                     else:
                         sound.play("step0")
+            else:
+                sound.play("cannot")
                         
         self.position_extras()
+
+    def update_steps(self):
+        max_steps = self.scene.game.get_max_steps()
+        if max_steps == 0:
+            self.steps.set_text(str(self.num_steps))
+        else:
+            steps_left = max_steps - self.num_steps
+            if steps_left < 10:
+                self.steps.color = (255,213,17)
+            if steps_left <= -1:
+                self.scene.sm.transition(Defeat(self.scene))
+            self.steps.set_text(str(steps_left))
 
     def exit(self):
         if self.flag in self.scene.animatedsprites:
             self.scene.animatedsprites.remove(self.flag)
             self.flag.kill()
             self.steps.kill()
+        self.scene.overlay.kill()
 
 
 AUTODEF = {
@@ -375,7 +405,10 @@ class Edit(State):
                 self.scene.tilemap.set_tile(gx, gy, 1)
             self.autotile_around(gx, gy)
         else:
-            self.scene.tilemap.set_tile(gx, gy, self.decoselect._frame)
+            if self.scene.tilemap._grid[gy][gx] == self.decoselect._frame:
+                self.scene.tilemap.set_tile(gx, gy, 0)
+            else:
+                self.scene.tilemap.set_tile(gx, gy, self.decoselect._frame)
 
     def autotile_around(self, cx, cy):
         w = len(self.scene.tilemap._grid[0])
@@ -427,14 +460,15 @@ class Victory(State):
         self.num_steps = num_steps
 
     def enter(self):
-        self.wintext = text.Text("Victory!", "big", (80, -20))
+        self.wintext = text.Text("Victory!", "huge", (50, -20))
         self.wintext_t = 0
         self.scene.ui_group.add(self.wintext)
         self.scene.game.record_victory(self.num_steps)
+        sound.play_music('victory', 0)
 
     def update(self, dt):
         self.wintext_t += dt
-        y = ( - math.cos(min(self.wintext_t,1) * 3.14159) * 0.5 + 0.5) ** 1.5 * 102 - 14
+        y = ( - math.cos(min(self.wintext_t,1) * 3.14159) * 0.5 + 0.5) ** 1.5 * 102 - 20
         self.wintext.set_pos(self.wintext.rect[0], y)
 
         if self.wintext_t > 3:
@@ -448,13 +482,14 @@ class Victory(State):
 
 class Defeat(State):
     def enter(self):
-        self.deftext = text.Text("Defeat.", "big", (80, -20))
+        self.deftext = text.Text("Defeat...", "huge", (55, -20))
         self.deftext_t = 0
         self.scene.ui_group.add(self.deftext)
+        sound.play("defeat")
 
     def update(self, dt):
         self.deftext_t += dt
-        y = ( - math.cos(min(self.deftext_t,1) * 3.14159) * 0.5 + 0.5) ** 1.5 * 102 - 14
+        y = ( - math.cos(min(self.deftext_t,1) * 3.14159) * 0.5 + 0.5) ** 1.5 * 102 - 20
         self.deftext.set_pos(self.deftext.rect[0], y)
 
         if self.deftext_t > 3:
