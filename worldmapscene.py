@@ -207,6 +207,9 @@ class WorldMapScene(scene.Scene):
             self.update_selection()
             sound.play("blip")
 
+        elif inp == "back":
+            self.game.go_to_menu()
+
         elif inp == "left":
             self.selected_level = max(self.selected_level - 1, 0)
             self.update_selection()

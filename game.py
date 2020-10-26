@@ -15,6 +15,7 @@ import worldmapscene
 import alphascene
 from resources import resource_path
 import sys
+import menuscene
 
 DEV = False
 SCALE = 3
@@ -119,3 +120,12 @@ class Game:
             if not old_state['beaten'] or steps < old_state['steps']:
                 self.save.set_level_state(self.playing_level_index, True, steps, stars)
                 self.save.save()
+
+    def go_to_menu(self):
+        self.scene = menuscene.MenuScene(self)
+        self.scene.start()
+
+    def update_scale(self, scale):
+        global SCALE
+        SCALE = scale
+        self.scaled_screen = pygame.display.set_mode((RES[0] * SCALE, RES[1] * SCALE))

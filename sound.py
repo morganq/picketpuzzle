@@ -1,4 +1,5 @@
 import pygame
+import save
 from resources import resource_path
 
 MUSIC_ENDEVENT = pygame.USEREVENT+1
@@ -23,7 +24,7 @@ def init():
     pygame.mixer.music.set_endevent(MUSIC_ENDEVENT)
 
 def play(name):
-    SOUNDS[name].play()
+    SOUNDS[name].play().set_volume(save.SAVE_OBJ.get_setting("sound_volume") / 10)
 
 
 MUSIC = {
@@ -57,9 +58,12 @@ def play_music(name, loops=0):
     pygame.mixer.music.play(loops=0)
     pygame.mixer.music.set_pos(mtct['pause_pos'] / 1000.0)
     mtct['last_start'] = mtct['pause_pos']
-    pygame.mixer.music.set_volume(0.15)
+    update_volume()
     LAST_TRACK = name
-    print(MUSIC_TIMES)
+    #print(MUSIC_TIMES)
+
+def update_volume():
+    pygame.mixer.music.set_volume(0.1 * save.SAVE_OBJ.get_setting("music_volume") / 10)
 
 def stop_music():
     if pygame.mixer.music.get_busy():
@@ -67,7 +71,7 @@ def stop_music():
 
 
 def end_of_music():
-    print("End of music")
+    #print("End of music")
     if CURRENT_TRACK != "victory":
         MUSIC_TIMES[CURRENT_TRACK]['last_start'] = 0
         MUSIC_TIMES[CURRENT_TRACK]['pause_pos'] = 0

@@ -2,7 +2,7 @@ import game
 import pygame
 import text
 import scene
-import worldmapscene
+import menuscene
 
 class AlphaScene(scene.Scene):
     def start(self):
@@ -18,7 +18,7 @@ class AlphaScene(scene.Scene):
 
     def take_input(self, inp, event):
         if inp == "action":
-            self.game.scene = worldmapscene.WorldMapScene(self.game, 0)
+            self.game.scene = menuscene.MenuScene(self.game)
             self.game.scene.start()
 
     def render(self):
