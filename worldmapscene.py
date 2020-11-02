@@ -31,7 +31,7 @@ LEVELS = [
     ('policeblock', 'BARCELONA', 'Shortcut', (292, 286), 22, 25, 32), # yep good
     ('introsoldier', 'BARCELONA', 'Soldiers', (327, 311), 29, 33, 36), # good
     ('intromultisoldier', 'BARCELONA', 'Barracks', (359, 291), 33, 40, 45), # easy 
-    ('manyturnaround', 'BARCELONA', 'Park', (379, 320), 60, 65, 75), # 3-4
+    ('manyturnaround', 'BARCELONA', 'Neighborhood', (379, 320), 60, 65, 75), # 3-4
     ('diagonalroute', 'BARCELONA', 'Hills', (384, 353), 49, 52, 75), # 4
     ('awkwardsoldier', 'ALGIERS', 'Statue', (294, 509), 45, 50, 55), # 4 - maybe slightly too hard?
     ('hardturnaround', 'ALGIERS', 'Alleyway', (339, 482), 43, 50, 70), # probably a bit hard

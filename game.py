@@ -17,7 +17,7 @@ from resources import resource_path
 import sys
 import menuscene
 
-DEV = False
+DEV = True
 SCALE = 3
 RES = (240,192)
 BGCOLOR = (42,17,81)
