@@ -9,6 +9,29 @@ import pygame
 import sound
 from resources import resource_path
 
+def autotile_around(scene, cx, cy):
+    w = len(scene.tilemap._grid[0])
+    h = len(scene.tilemap._grid)
+    for x in range(max(cx - 1,0), min(cx + 2, w)):
+        for y in range(max(cy - 1,0), min(cy + 2,h)):
+            if scene.tilemap._grid[y][x] in game.ROADTILES:
+                autotile(scene, x, y)
+
+def autotile(scene, gx, gy):
+    w = len(scene.tilemap._grid[0])
+    h = len(scene.tilemap._grid)        
+    def is_road(x,y):
+        if x < 0 or y < 0 or x >= w or y >= h:
+            return False
+        else:
+            return scene.tilemap._grid[y][x] in game.ROADTILES + [16]
+    around = (
+        is_road(gx - 1, gy), is_road(gx, gy - 1), is_road(gx + 1, gy), is_road(gx, gy + 1)
+    )
+    if around in AUTODEF:
+        scene.tilemap.set_tile(gx, gy, AUTODEF[around])
+
+
 DIRS_FROM_OFFSETS = {
     (1,0):0, (0,1):1, (-1,0):2, (0,-1):3
 }
@@ -136,16 +159,21 @@ class March(State):
                 worker_poss = [(w.gx, w.gy) for w in self.scene.snake]
                 o = self.scene.object_grid[ty][tx]
                 if o == None and (tx,ty) not in worker_poss:
-                    if self.scene.road_grid[ty][tx] == True:
+                    destructable = (self.scene.tilemap._grid[ty][tx] == 16 and enemy.type == "tank")
+                    if self.scene.road_grid[ty][tx] == True or destructable:
                         self.scene.object_grid[enemy.gy][enemy.gx] = None
                         enemy.gx = tx
                         enemy.gy = ty
-                        enemy.move(tx * game.TILESIZE, ty * game.TILESIZE - 6)
+                        enemy.move(tx * game.TILESIZE + enemy.x_offset, ty * game.TILESIZE - 6)
                         enemy.last_move_direction = dir
                         enemy.update_direction()
                         self.scene.object_grid[enemy.gy][enemy.gx] = enemy
                         moved = True
                         sound.play("step0")
+                    if destructable:
+                        self.scene.tilemap.set_tile(tx, ty, 15)
+                        self.scene.road_grid[ty][tx] = True
+                        autotile_around(self.scene, tx, ty)
 
             
         if moved:
@@ -164,7 +192,7 @@ class March(State):
         enemies = []
         for row in self.scene.object_grid:
             for cell in row:
-                if cell and (cell.type == "soldier" or cell.type == "police"):
+                if cell and (cell.type == "soldier" or cell.type == "police" or cell.type == "tank"):
                     enemies.append(cell)
         def dist(e):
             return math.sqrt((e.gx - tower.gx) ** 2 + (e.gy - tower.gy) ** 2)
@@ -186,7 +214,6 @@ class March(State):
         o = self.scene.object_grid[ty][tx]
         if o == None:
             self.move(tx, ty, dir)
-            self.move_tanks()
         else:
             did_push = o.interact(self, w)
             if len(self.scene.snake) == 0:
@@ -197,11 +224,10 @@ class March(State):
                 return
             if did_push:
                 self.move(tx, ty, dir)
-                self.move_tanks()
 
     def move_tanks(self):
         for tank in self.scene.tanks:
-            tank.step()
+            tank.step(self.scene)
 
 
     def move(self, tx, ty, dir):
@@ -258,6 +284,7 @@ class March(State):
                         sound.play("step1")
                     else:
                         sound.play("step0")
+                    self.move_tanks()
             else:
                 sound.play("cannot")
                         
@@ -409,28 +436,11 @@ class Edit(State):
                 self.scene.tilemap.set_tile(gx, gy, 0)
             else:
                 self.scene.tilemap.set_tile(gx, gy, self.decoselect._frame)
+            if self.deco == 1:
+                self.autotile_around(gx,gy)
 
     def autotile_around(self, cx, cy):
-        w = len(self.scene.tilemap._grid[0])
-        h = len(self.scene.tilemap._grid)
-        for x in range(max(cx - 1,0), min(cx + 2, w)):
-            for y in range(max(cy - 1,0), min(cy + 2,h)):
-                if self.scene.tilemap._grid[y][x] in game.ROADTILES:
-                    self.autotile(x, y)
-
-    def autotile(self, gx, gy):
-        w = len(self.scene.tilemap._grid[0])
-        h = len(self.scene.tilemap._grid)        
-        def is_road(x,y):
-            if x < 0 or y < 0 or x >= w or y >= h:
-                return False
-            else:
-                return self.scene.tilemap._grid[y][x] in game.ROADTILES
-        around = (
-            is_road(gx - 1, gy), is_road(gx, gy - 1), is_road(gx + 1, gy), is_road(gx, gy + 1)
-        )
-        if around in AUTODEF:
-            self.scene.tilemap.set_tile(gx, gy, AUTODEF[around])
+        autotile_around(self.scene, cx, cy)
 
     def exit(self):
         self.save("temp")
@@ -473,7 +483,7 @@ class Victory(State):
 
         if self.wintext_t > 3:
             self.exit()
-            self.scene.game.return_to_map()
+            self.scene.game.return_to_map(won=True)
 
     def take_input(self, input, event):
         if input == "click": 
@@ -500,3 +510,11 @@ class Defeat(State):
     def take_input(self, input, event):
         if input == "click": 
             self.scene.sm.transition(Edit(self.scene))    
+
+class TankFireState(State):
+    def __init__(self, scene, tank):
+        self.tank = tank
+        State.__init__(self, scene)
+
+    def update(self, dt):
+        self.tank.fire_update(self.scene, dt)

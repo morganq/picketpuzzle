@@ -5,16 +5,18 @@ import random
 
 class Character(framesprite.FrameSprite):
     type = "character"
-    def __init__(self, sheet, gx, gy, width):
+    def __init__(self, sheet, gx, gy, width, x_offset=0):
         self.gx = gx
         self.gy = gy
         x = gx * game.TILESIZE
         y = gy * game.TILESIZE
         framesprite.FrameSprite.__init__(self, sheet, width)
-        self.rect = (x, y - 6, width, self._sheet.get_size()[1])
+        self.x_offset = x_offset
+        self.rect = (x + self.x_offset, y - 6, width, self._sheet.get_size()[1])
         self.activated = False
         self.last_move_direction = random.randint(0,min(4, self._sheet.get_size()[0] // width // 2) - 1)
         self.step_animation()
+        
 
     def step_animation(self):
         base_frame = self.last_move_direction * 2

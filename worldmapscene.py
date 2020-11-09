@@ -88,7 +88,7 @@ class WorldMapScene(scene.Scene):
 
         for i,level in enumerate(LEVELS):
             x,y = level[3][0], level[3][1]
-            obj = framesprite.FrameSprite("assets/cityhall.png", 12)
+            obj = framesprite.FrameSprite("assets/mapflag copy.png", 12)
             if self.game.save.get_level_state(i)['beaten']:
                 obj.set_frame(1)
             obj.move(x - 6,y - 10)
@@ -241,7 +241,7 @@ class WorldMapScene(scene.Scene):
             for sprite in self.animated:
                 sprite.step_animation() 
             self.flash_index = (self.flash_index + 1) % 2
-            self.next_text.color = [(247, 249, 223), (255, 213, 17)][self.flash_index]
+            self.next_text.color = [(247, 249, 223), (67, 201, 40)][self.flash_index]
             self.next_text.update()
-            self.prev_text.color = [(247, 249, 223), (255, 213, 17)][self.flash_index]
+            self.prev_text.color = [(247, 249, 223), (67, 201, 40)][self.flash_index]
             self.prev_text.update()

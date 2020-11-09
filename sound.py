@@ -15,6 +15,7 @@ SOUNDFILES = {
     'cannot':'assets/Cannot.wav',
     'cell':'assets/Cell.wav',
     'defeat':'assets/Defeat.wav',
+    'tankfire':'assets/TankFire.wav'
 }
 SOUNDS = {}
 

@@ -27,7 +27,7 @@ DIRS_FROM_OFFSETS = {
     (1,0):0, (0,1):1, (-1,0):2, (0,-1):3
 }
 ROADTILES = list(range(1, 16))
-DECOTILES = list(range(19, 40))
+DECOTILES = list(range(16, 40))
 OBJ = {
     'factory': 0,
     'cityhall': 1,
@@ -96,8 +96,11 @@ class Game:
         self.scene = levelscene.LevelScene(self, level)
         self.scene.start()
 
-    def return_to_map(self):
-        self.scene = worldmapscene.WorldMapScene(self, self.playing_level_index)
+    def return_to_map(self, won=False):
+        level = self.playing_level_index
+        if won and self.playing_level_index:
+            level = self.playing_level_index + 1
+        self.scene = worldmapscene.WorldMapScene(self, level)
         self.scene.start()
             
     def get_max_steps(self):
