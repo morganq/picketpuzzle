@@ -15,7 +15,8 @@ SOUNDFILES = {
     'cannot':'assets/Cannot.wav',
     'cell':'assets/Cell.wav',
     'defeat':'assets/Defeat.wav',
-    'tankfire':'assets/TankFire.wav'
+    'tankfire':'assets/TankFire.wav',
+    'tankdrive':'assets/TankDrive.wav'
 }
 SOUNDS = {}
 
@@ -25,46 +26,48 @@ def init():
     pygame.mixer.music.set_endevent(MUSIC_ENDEVENT)
 
 def play(name):
-    SOUNDS[name].play().set_volume(save.SAVE_OBJ.get_setting("sound_volume") / 10)
+    vol = save.SAVE_OBJ.get_setting("sound_volume") / 12
+    if vol > 0:
+        SOUNDS[name].play().set_volume(vol)
 
 
 MUSIC = {
-    'overworld':resource_path('assets/17_Knights of the Demon World Tower.ogg'),
-    'game':resource_path('assets/10_Forbidden Tower.ogg'),
-    'victory':resource_path('assets/Jingle3.ogg'),
+    'overworld':resource_path('assets/menusong.ogg'),
+    'game':resource_path('assets/ingamesong.ogg'),
+    'victory':resource_path('assets/newvictory.ogg'),
 }
 MUSIC_TIMES = {
-    'overworld':{'last_start':0, 'pause_pos':0},
-    'game':{'last_start':0, 'pause_pos':0},
-    'victory':{'last_start':0, 'pause_pos':0}
+    'overworld':0,
+    'game':0,
+    'victory':0
+}
+MUSIC_VOLUME_CO = {
+    'overworld':1.5,
+    'game':2.25,
+    'victory':1.25
 }
 LAST_TRACK = None
 CURRENT_TRACK = None
 
 def play_music(name, loops=0):
-    global CURRENT_TRACK
+    global CURRENT_TRACK, MUSIC_TIMES, LAST_TRACK
     CURRENT_TRACK = name
-    if name == "victory":
-        pygame.mixer.music.load(MUSIC[name])
-        pygame.mixer.music.play(loops=0)
-        return
 
-    global MUSIC_TIMES, LAST_TRACK
+    if name == "victory":
+        MUSIC_TIMES['victory'] = 0
+
     time_played = pygame.mixer.music.get_pos()
     if LAST_TRACK:
-        mtlt = MUSIC_TIMES[LAST_TRACK]
-        mtlt['pause_pos'] = mtlt['last_start'] + time_played
-    mtct = MUSIC_TIMES[name]
+        MUSIC_TIMES[LAST_TRACK] = pygame.mixer.music.get_pos()
+
     pygame.mixer.music.load(MUSIC[name])
     pygame.mixer.music.play(loops=0)
-    pygame.mixer.music.set_pos(mtct['pause_pos'] / 1000.0)
-    mtct['last_start'] = mtct['pause_pos']
-    update_volume()
+    pygame.mixer.music.set_pos(MUSIC_TIMES[name] / 1000.0)
+    update_volume(CURRENT_TRACK)
     LAST_TRACK = name
-    #print(MUSIC_TIMES)
 
-def update_volume():
-    pygame.mixer.music.set_volume(0.1 * save.SAVE_OBJ.get_setting("music_volume") / 10)
+def update_volume(track):
+    pygame.mixer.music.set_volume(0.1 * save.SAVE_OBJ.get_setting("music_volume") / 10 * MUSIC_VOLUME_CO[track])
 
 def stop_music():
     if pygame.mixer.music.get_busy():
@@ -72,8 +75,6 @@ def stop_music():
 
 
 def end_of_music():
-    #print("End of music")
     if CURRENT_TRACK != "victory":
-        MUSIC_TIMES[CURRENT_TRACK]['last_start'] = 0
-        MUSIC_TIMES[CURRENT_TRACK]['pause_pos'] = 0
-        play_music(CURRENT_TRACK)   
+        MUSIC_TIMES[CURRENT_TRACK] = 0
+        play_music(CURRENT_TRACK)

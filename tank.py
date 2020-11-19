@@ -78,11 +78,11 @@ class Tank(character.Character):
         if (bx,by) in snake_poss:
             self.bullet_obj.move(-20, -20)
             for w in scene.snake:
-                w.move(-20, -20)
+                w.blinking = True
             scene.sm.transition(levelstates.Defeat(scene))
 
 
-    def step(self, scene):
+    def tank_step(self, scene):
         if self.is_aiming_at_player(scene):
             self.fire(scene)
             return
@@ -94,7 +94,7 @@ class Tank(character.Character):
             next_obj = scene.object_grid[ny][nx]
             if next_obj is None:
                 scene.object_grid[self.gy][self.gx] = None
-                self.move(nx * game.TILESIZE + self.x_offset, ny * game.TILESIZE - 6)
+                self.step(nx * game.TILESIZE + self.x_offset, ny * game.TILESIZE - 6)
                 self.gx = nx
                 self.gy = ny
                 scene.object_grid[self.gy][self.gx] = self
@@ -105,4 +105,7 @@ class Tank(character.Character):
 
         if blocked:
             self.last_move_direction = (2 + self.last_move_direction) % 4
-            self.update_direction()
+            self.update_direction()      
+            return False
+        else:
+            return True    

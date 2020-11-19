@@ -4,7 +4,8 @@ from resources import resource_path
 DEFAULT_SETTINGS = {
     'music_volume': 5,
     'sound_volume': 5,
-    'scale': 3
+    'scale': 3,
+    'showed_credits': False
 }
 
 FILENAME = "save.json"

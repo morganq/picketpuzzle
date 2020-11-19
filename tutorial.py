@@ -82,7 +82,8 @@ class ExtraFactsTutorial(TutorialPopup):
 
 class SimplePickerTutorial(TutorialPopup):
     def build(self):
-        self.add_text("Use the left and right arrow keys, then space to pick the factory you want to start from.")
+        self.add_text("Here you have to pick a factory to start from.")
+        self.add_text("Use the left and right arrow keys to select, then space to choose.")
 
 class IntroPoliceTutorial(TutorialPopup):
     def build(self):
@@ -90,7 +91,7 @@ class IntroPoliceTutorial(TutorialPopup):
 
 class PoliceLineTutorial(TutorialPopup):
     def build(self):
-        self.add_text("A line of Police can still be pushed, if your forces match theirs.")
+        self.add_text("A whole line of Police can be pushed, if your forces match theirs.")
 
 class IntroSoldierTutorial(TutorialPopup):
     def build(self):

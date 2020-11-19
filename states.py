@@ -23,3 +23,6 @@ class State:
 
     def update(self, dt):
         pass
+
+    def render(self, screen):
+        pass

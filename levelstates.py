@@ -164,7 +164,7 @@ class March(State):
                         self.scene.object_grid[enemy.gy][enemy.gx] = None
                         enemy.gx = tx
                         enemy.gy = ty
-                        enemy.move(tx * game.TILESIZE + enemy.x_offset, ty * game.TILESIZE - 6)
+                        enemy.step(tx * game.TILESIZE + enemy.x_offset, ty * game.TILESIZE - 6, 0)
                         enemy.last_move_direction = dir
                         enemy.update_direction()
                         self.scene.object_grid[enemy.gy][enemy.gx] = enemy
@@ -215,19 +215,26 @@ class March(State):
         if o == None:
             self.move(tx, ty, dir)
         else:
-            did_push = o.interact(self, w)
+            did_push = o.interact(self, w)            
             if len(self.scene.snake) == 0:
                 if all([f.activated for f in self.scene.cityhalls]):
                     self.scene.sm.transition(Victory(self.scene, self.num_steps))
                 else:
                     self.scene.sm.transition(Defeat(self.scene))
                 return
+            else:
+                self.scene.snake[0].last_move_direction = dir
+                self.scene.snake[0].update_direction()                
             if did_push:
                 self.move(tx, ty, dir)
 
     def move_tanks(self):
+        any_steps = False
         for tank in self.scene.tanks:
-            tank.step(self.scene)
+            stepped = tank.tank_step(self.scene)
+            any_steps = any_steps or stepped
+        if any_steps:
+            sound.play("tankdrive")
 
 
     def move(self, tx, ty, dir):
@@ -239,6 +246,8 @@ class March(State):
                 if len(self.scene.snake) > 1:
                     if self.scene.snake[1].gx == tx and self.scene.snake[1].gy == ty:
                         sound.play("cannot")
+                        self.scene.snake[0].last_move_direction = dir
+                        self.scene.snake[0].update_direction()
                         return # Don't move
 
                 # Figure out the positions of the new snake
@@ -259,13 +268,14 @@ class March(State):
                         self.scene.remove_queued_worker()
                         add_worker = worker.Worker(self.scene.snake[-1].gx, self.scene.snake[-1].gy)
                         self.scene.game_group.add(add_worker)
-                        self.scene.animatedsprites.append(add_worker)                        
+                        self.scene.animatedsprites.append(add_worker)
+                        add_worker.step(add_worker.rect[0], add_worker.rect[1], len(self.scene.snake))
 
                     for i,cell in enumerate(self.scene.snake):
                         ss = new_snake_spots[i]
                         cell.gx = ss[0]
                         cell.gy = ss[1]
-                        cell.move(ss[0] * game.TILESIZE, ss[1] * game.TILESIZE - 6)
+                        cell.step(ss[0] * game.TILESIZE, ss[1] * game.TILESIZE - 6, i)
                         cell.last_move_direction = ss[2]
                         cell.update_direction()
 
@@ -286,6 +296,8 @@ class March(State):
                         sound.play("step0")
                     self.move_tanks()
             else:
+                self.scene.snake[0].last_move_direction = dir
+                self.scene.snake[0].update_direction()                
                 sound.play("cannot")
                         
         self.position_extras()
@@ -470,18 +482,22 @@ class Victory(State):
         self.num_steps = num_steps
 
     def enter(self):
-        self.wintext = text.Text("Victory!", "huge", (50, -20))
-        self.wintext_t = 0
-        self.scene.ui_group.add(self.wintext)
+        self.victory_image = pygame.image.load(resource_path("assets/victory.png"))
+        self.victory_t = 0
+        self.angle = 0
+        self.scale = 0
         self.scene.game.record_victory(self.num_steps)
         sound.play_music('victory', 0)
 
     def update(self, dt):
-        self.wintext_t += dt
-        y = ( - math.cos(min(self.wintext_t,1) * 3.14159) * 0.5 + 0.5) ** 1.5 * 102 - 20
-        self.wintext.set_pos(self.wintext.rect[0], y)
+        self.victory_t += dt
+        t = self.victory_t * 0.75
+        max_angle = 360 * 6
+        zt = min(math.sin(min(t * 1.15,1) * 3.1415 / 2), 1)
+        self.angle = max_angle * zt
+        self.scale = min(t * 1.15, 1)
 
-        if self.wintext_t > 3:
+        if self.victory_t > 4.5:
             self.exit()
             self.scene.game.return_to_map(won=True)
 
@@ -489,6 +505,9 @@ class Victory(State):
         if input == "click": 
             self.scene.sm.transition(Edit(self.scene))
 
+    def render(self, screen):
+        paper = pygame.transform.rotozoom(self.victory_image, self.angle, self.scale)
+        screen.blit(paper, (screen.get_width() / 2 - paper.get_width() / 2, screen.get_height() / 2 - paper.get_height() / 2))            
 
 class Defeat(State):
     def enter(self):
@@ -510,6 +529,33 @@ class Defeat(State):
     def take_input(self, input, event):
         if input == "click": 
             self.scene.sm.transition(Edit(self.scene))    
+
+class Defeat_no(State):
+    def enter(self):
+        self.defeat_image = pygame.image.load(resource_path("assets/defeat.png"))
+        self.defeat_t = 0
+        self.angle = 0
+        self.scale = 0
+        sound.play("defeat")
+
+    def update(self, dt):
+        self.defeat_t += dt
+        max_angle = 360 * 8
+        self.angle = min(((self.defeat_t + 0.5) ** 0.5) * max_angle * 0.85, max_angle)
+        self.scale = min(self.defeat_t * 1, 1)
+
+        if self.defeat_t > 3:
+            self.exit()
+            self.scene.load()
+            self.scene.initialize_state()
+
+    def take_input(self, input, event):
+        if input == "click": 
+            self.scene.sm.transition(Edit(self.scene))    
+
+    def render(self, screen):
+        paper = pygame.transform.rotozoom(self.defeat_image, self.angle, self.scale)
+        screen.blit(paper, (screen.get_width() / 2 - paper.get_width() / 2, screen.get_height() / 2 - paper.get_height() / 2))
 
 class TankFireState(State):
     def __init__(self, scene, tank):

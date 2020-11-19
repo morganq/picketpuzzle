@@ -44,7 +44,7 @@ class Police(character.Character):
         for obj in to_push:
             obj.gx += offset[0]
             obj.gy += offset[1]
-            obj.move(obj.gx * game.TILESIZE, obj.gy * game.TILESIZE - 6)
+            obj.step(obj.gx * game.TILESIZE, obj.gy * game.TILESIZE - 6, 1)
             obj.last_move_direction = game.DIRS_FROM_OFFSETS[(-offset[0], -offset[1])]
             obj.step_animation()
             state.scene.object_grid[obj.gy][obj.gx] = obj

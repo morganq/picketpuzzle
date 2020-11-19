@@ -162,7 +162,10 @@ class LevelScene(scene.Scene):
 
     def update_layers(self):
         for sprite in self.game_group.sprites():
-            self.game_group.change_layer(sprite, pygame.Rect(sprite.rect).bottom)
+            adjustment = 0
+            if sprite.type == "particle":
+                adjustment = -12
+            self.game_group.change_layer(sprite, pygame.Rect(sprite.rect).bottom + adjustment)
 
     def start(self):
         self.load()
@@ -177,6 +180,9 @@ class LevelScene(scene.Scene):
             for sprite in self.animatedsprites:
                 sprite.step_animation()        
 
+        for sprite in self.game_group.sprites():
+            sprite.update(dt)
+
     def render(self):
         self.game.screen.fill(game.BGCOLOR)
         self.update_layers()
@@ -184,3 +190,4 @@ class LevelScene(scene.Scene):
         self.game_group.draw(self.game.screen)
         self.ui_group.draw(self.game.screen)        
         self.tutorial_group.draw(self.game.screen)
+        self.sm.state.render(self.game.screen)

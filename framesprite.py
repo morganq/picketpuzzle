@@ -10,6 +10,7 @@ class FrameSprite(pygame.sprite.Sprite):
         self._frame_width = width
         self._update_image()
         self.rect = (0,0,width,self._sheet.get_size()[1])
+        self._num_frames = self._sheet.get_size()[0] // self._frame_width
 
     def _update_image(self):
         self.image = self._sheet.subsurface(
@@ -24,4 +25,7 @@ class FrameSprite(pygame.sprite.Sprite):
         self.rect = (x,y, self.rect[2], self.rect[3])
 
     def step_animation(self):
-        self.set_frame((self._frame + 1) % (self._sheet.get_size()[0] // self._frame_width))
+        self.set_frame((self._frame + 1) % self._num_frames)
+
+    def update(self, dt):
+        pass

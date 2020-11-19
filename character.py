@@ -2,6 +2,7 @@ import pygame
 import framesprite
 import game
 import random
+import particle
 
 class Character(framesprite.FrameSprite):
     type = "character"
@@ -16,6 +17,9 @@ class Character(framesprite.FrameSprite):
         self.activated = False
         self.last_move_direction = random.randint(0,min(4, self._sheet.get_size()[0] // width // 2) - 1)
         self.step_animation()
+
+        self.must_finish_step = False
+        self.just_stepped_t = 0
         
 
     def step_animation(self):
@@ -43,3 +47,24 @@ class Character(framesprite.FrameSprite):
         elif roads[self.gy-1][self.gx]:
             self.last_move_direction = 3
         self.update_direction()
+
+    def update(self, dt):
+        if self.must_finish_step:
+            self.just_stepped_t -= dt
+            if self.just_stepped_t <= 0:
+                self.must_finish_step = False
+                self.move(self.rect[0], self.rect[1] + 2)
+                for i in range(4):
+                    dx = random.randint(-3, 3)
+                    p = particle.Particle(
+                        "assets/dustcloud2.png",
+                        5,
+                        (self.rect[0] + self.rect[2] / 2 - 2 + dx, self.rect[1] + self.rect[3] - 3),
+                        0.25 + random.random() * 0.125,
+                        (dx * 1, 0))
+                    self.groups()[0].add(p)
+
+    def step(self, x, y, offset=0):
+        self.move(x, y-2)
+        self.just_stepped_t = (offset + 1) * 0.05
+        self.must_finish_step = True

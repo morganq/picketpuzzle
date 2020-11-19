@@ -12,48 +12,62 @@ from collections import defaultdict
 from resources import resource_path
 
 LEVELS = [
-    ('intro1', 'SEATTLE', 'The Port', (94, 118), 16, 20, 30),
-    ('intro2', 'SEATTLE', 'Industrial District', (114, 127), 32, 33, 40),
-    ('intro3', 'SEATTLE', 'Demonstration', (113, 88), 18, 25, 32), # May do drop-offs and not learn the lesson
-    ('intro4', 'SEATTLE', 'Downtown', (133, 87), 28, 35, 50), # good
-    ('backandforth', 'SEATTLE', 'Train Station', (156, 116), 28, 30, 50), # good
-    ('multidrop', 'SEATTLE', 'Sprawl', (180, 141), 29, 34, 40), # just more in depth than ^
-    ('introturnaround', 'OAKLAND', 'Roundabout', (55, 280), 48, 52, 55), # a bit tricky? 
-    ('basicturnaround', 'OAKLAND', 'Broadway', (96, 281), 19, 25, 35), # also a bit tricky - maybe later?
+    ('intro1', 'SEATTLE', 'Docks', (94, 118), 16, 20, 30),
+    ('intro2', 'SEATTLE', 'Industrial Center', (114, 127), 32, 33, 40),
+    ('intro3', 'SEATTLE', 'City Square', (113, 88), 18, 25, 32), 
+    ('intro4', 'SEATTLE', 'Park', (133, 87), 28, 35, 50), # good
+    ('backandforth', 'SEATTLE', 'Train Station', (156, 116), 28, 30, 50), #e in depth than ^ good
+    ('multidrop', 'SEATTLE', 'Sprawl', (180, 141), 29, 34, 40), # just mor
+
+    ('intropolice', 'OAKLAND', 'Police Training', (55, 280), 10, 12, 15), 
+    ('policemaneuver', 'OAKLAND', 'Patrol', (96, 281), 31, 34, 45),
     ('extrafacts', 'OAKLAND', 'Excess Capacity', (124, 300), 24, 30, 40), # no problem
-    ('simplepicker', 'OAKLAND', 'Convergence', (168, 335), 28, 35, 50), # good
-    ('harderpicker', 'OAKLAND', 'Residential', (215, 344), 58, 62, 120), # good one
-    ('intropolice', 'SANTIAGO', 'Police', (40, 477), 10, 12, 15), # ok... a bit weird to have the two there
-    ('policeline', 'SANTIAGO', 'Confrontation', (95, 488), 25, 30, 40), # I think good!
-    ('policemaneuver', 'SANTIAGO', 'Loop', (148, 541), 31, 34, 45), # good
+    ('introturnaround', 'OAKLAND', 'Roundabout', (168, 335), 48, 52, 55),
+    ('basicturnaround', 'OAKLAND', 'Tightly Packed', (215, 344), 19, 25, 35),
+    
+    ('simplepicker', 'SANTIAGO', 'Convergence', (40, 477), 28, 35, 50), # good
+    ('harderpicker', 'SANTIAGO', 'Outskirts', (95, 488), 58, 62, 120), # good one
+    ('policeline', 'SANTIAGO', 'Blue Line', (148, 541), 25, 30, 40), # I think good!
     ('policeavoid', 'SANTIAGO', 'Squad', (182, 510), 40, 45, 50), # subtle and important lesson
-    ('multipolice', 'SANTIAGO', 'Headquarters', (202, 496), 34, 44, 54), # not as tricky as it may look
-    ('policeblock', 'BARCELONA', 'Shortcut', (292, 286), 22, 25, 32), # yep good
-    ('introsoldier', 'BARCELONA', 'Soldiers', (327, 311), 29, 33, 36), # good
+    ('introsoldier', 'SANTIAGO', 'Armed Forces', (202, 496), 29, 33, 36), # good
+
+    ('multipolice', 'BARCELONA', 'Police HQ', (292, 286), 34, 44, 54), # not as tricky as it may look
+    ('policeblock', 'BARCELONA', 'Shortcut', (327, 311), 22, 25, 32), # yep good
     ('intromultisoldier', 'BARCELONA', 'Barracks', (359, 291), 33, 40, 45), # easy 
-    ('manyturnaround', 'BARCELONA', 'Neighborhood', (379, 320), 60, 65, 75), # 3-4
-    ('diagonalroute', 'BARCELONA', 'Hills', (384, 353), 49, 52, 75), # 4
-    ('awkwardsoldier', 'ALGIERS', 'Statue', (294, 509), 45, 50, 55), # 4 - maybe slightly too hard?
+    ('manyturnaround', 'BARCELONA', 'Barrio', (379, 320), 60, 65, 75), # 3-4
+    ('diagonalroute', 'BARCELONA', 'Hillside', (384, 353), 55, 60, 75), # 4
+
+    ('awkwardsoldier', 'ALGIERS', 'Recruits', (294, 509), 50, 55, 65), # 4 - maybe slightly too hard?
     ('hardturnaround', 'ALGIERS', 'Alleyway', (339, 482), 43, 50, 70), # probably a bit hard
     ('policemultihall', 'ALGIERS', 'Kettle', (380, 513), 45, 50, 55), #kinda hard
-    ('complexmultisoldier', 'ALGIERS', 'Infiltrate', (405, 488), 67, 75, 85), # 5
+    ('complexmultisoldier', 'ALGIERS', 'Infiltration', (405, 488), 67, 75, 85), # 5
     ('coplocks', 'ALGIERS', 'Tactical', (447, 480), 51, 58, 65), # 5
-    ('coplock2', 'MINSK', 'Lockdown', (324, 105), 50, 100, 120), # 5
-    ('introtower', 'MINSK', 'Cell Tower', (361, 122), 20, 25, 35), # good
-    ('tower2', 'MINSK', 'Dead End', (400, 111), 50, 100, 120), # good
+
+    ('coplock2', 'MINSK', 'Lockdown', (324, 105), 50, 55, 65), # 5
+    ('introtower', 'MINSK', 'Cell Tower', (361, 122), 15, 20, 25), # good
+    ('tower2', 'MINSK', 'Dead End', (400, 111), 23, 25, 35), # good
     ('rearrangesoldiers', 'MINSK', 'Operations', (460, 143), 30, 40, 50), # good    
-    ('push2copsaround', 'TEHRAN', 'Standoff', (548, 93), 50, 100, 120), # 5
+
+    ('push2copsaround', 'TEHRAN', 'Standoff', (548, 93), 85, 95, 105), # 5
     ('pods', 'TEHRAN', 'Campus', (602, 130), 58, 70, 85), # 5
-    ('dividesoldiers', 'TEHRAN', 'Palace', (662, 90), 50, 60, 70), # 5
+    ('dividesoldiers', 'TEHRAN', 'Palace', (662, 90), 100, 110, 130), # 5
     ('complex2', 'TEHRAN', 'Density', (693, 125), 50, 100, 120), # 5
-    ('towerring', 'MUMBAI', 'Ring', (590, 288), 60, 65, 70), # 5-6
+
+    ('towerring', 'MUMBAI', 'Ring', (590, 288), 55, 65, 70), # 5-6
     ('hardsoldierpolice', 'MUMBAI', 'Parade', (615, 324), 70, 80, 90), # 6
-    ('breakupcops', 'MUMBAI', 'Commercial District', (662, 319), 59, 65, 90), # good - 6
-    ('complex1', 'MUMBAI', 'Fortification', (711, 346), 50, 100, 120),  # 7
-    ('twotowers', 'HONG KONG', 'Comms Center', (567, 532), 35, 42, 50),  # great - 7
-    ('twotowercomplex', 'HONG KONG', 'Broadcast', (626, 479), 50, 60, 70), # 7
-    ('towercomplex', 'HONG KONG', 'City Square', (674, 477), 50, 60, 70), # 7
-    ('tonsofcops', 'HONG KONG', 'Police Riot', (691, 537), 50, 100, 120), # 8
+    ('breakupcops', 'MUMBAI', 'Commercial District', (662, 319), 60, 65, 80), # good - 6
+    ('complex1', 'MUMBAI', 'Fortification', (711, 346), 93, 110, 130),  # 7
+    
+    ('tonsofcops', 'HONG KONG', 'Police Riot', (567, 532), 50, 60, 70), # 8
+    ('twotowercomplex', 'HONG KONG', 'Interference', (626, 479), 50, 60, 70), # 7
+    ('twotowers', 'HONG KONG', 'Comms Center', (674, 477), 35, 42, 50),  # great - 7
+    ('towercomplex', 'HONG KONG', 'Hostile Dispatch', (691, 537), 50, 60, 70), # 7
+
+    ('tank1', 'NEW YORK CITY', 'Big Gun', (823, 292), 40, 50, 60),
+    ('tank2', 'NEW YORK CITY', 'Friendly Fire', (840, 329), 30, 45, 60),
+    ('tank3', 'NEW YORK CITY', 'Artillery', (898, 287), 40, 55, 65),
+    ('tank4', 'NEW YORK CITY', 'Martial Law', (919, 339), 50, 100, 120),
+    ('tank5', 'NEW YORK CITY', 'Smashing Obstacles', (977, 293), 90, 110, 130),
 ]
 # SEATTLE, OAKLAND, SANTIAGO, BARCELONA, ALGIERS, MINSK, TEHRAN, MUMBAI, HONG KONG, NEW YORK CITY
 
@@ -123,6 +137,7 @@ class WorldMapScene(scene.Scene):
 
     def update_selection(self):
         (lvl, name1, name2, pos, *extras) = LEVELS[self.selected_level]
+        name2 = "%d - %s" % (self.selected_level + 1, name2)
         self.scroll = SCROLLS[name1]
         self.arrow.move(pos[0] - self.scroll[0] -13, pos[1] - self.scroll[1] - 18)
 
