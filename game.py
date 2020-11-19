@@ -19,7 +19,7 @@ import menuscene
 import creditsscene
 import simplesprite
 
-DEV = True
+DEV = False
 SCALE = 3
 RES = (240,192)
 BGCOLOR = (42,17,81)
