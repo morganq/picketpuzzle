@@ -63,11 +63,11 @@ def play_music(name, loops=0):
     pygame.mixer.music.load(MUSIC[name])
     pygame.mixer.music.play(loops=0)
     pygame.mixer.music.set_pos(MUSIC_TIMES[name] / 1000.0)
-    update_volume(CURRENT_TRACK)
+    update_volume()
     LAST_TRACK = name
 
-def update_volume(track):
-    pygame.mixer.music.set_volume(0.1 * save.SAVE_OBJ.get_setting("music_volume") / 10 * MUSIC_VOLUME_CO[track])
+def update_volume():
+    pygame.mixer.music.set_volume(0.1 * save.SAVE_OBJ.get_setting("music_volume") / 10 * MUSIC_VOLUME_CO[CURRENT_TRACK])
 
 def stop_music():
     if pygame.mixer.music.get_busy():
