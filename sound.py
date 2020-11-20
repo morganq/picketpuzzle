@@ -62,6 +62,7 @@ def play_music(name, loops=0):
 
     pygame.mixer.music.load(MUSIC[name])
     pygame.mixer.music.play(loops=0)
+    print("about to set pos", MUSIC_TIMES[name] / 1000.0)
     pygame.mixer.music.set_pos(MUSIC_TIMES[name] / 1000.0)
     update_volume()
     LAST_TRACK = name
