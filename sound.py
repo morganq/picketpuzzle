@@ -49,8 +49,10 @@ MUSIC_VOLUME_CO = {
 LAST_TRACK = None
 CURRENT_TRACK = None
 
-def play_music(name, loops=0):
+def play_music(name, loops=0, force = False):
     global CURRENT_TRACK, MUSIC_TIMES, LAST_TRACK
+    if name == CURRENT_TRACK and not force:
+        return
     CURRENT_TRACK = name
 
     if name == "victory":
@@ -62,8 +64,10 @@ def play_music(name, loops=0):
 
     pygame.mixer.music.load(MUSIC[name])
     pygame.mixer.music.play(loops=0)
-    print("about to set pos", MUSIC_TIMES[name] / 1000.0)
-    pygame.mixer.music.set_pos(MUSIC_TIMES[name] / 1000.0)
+    try:
+        pygame.mixer.music.set_pos(max(0,MUSIC_TIMES[name] / 1000.0))
+    except Exception as e:
+        print(e)
     update_volume()
     LAST_TRACK = name
 
@@ -78,4 +82,4 @@ def stop_music():
 def end_of_music():
     if CURRENT_TRACK != "victory":
         MUSIC_TIMES[CURRENT_TRACK] = 0
-        play_music(CURRENT_TRACK)
+        play_music(CURRENT_TRACK, force=True)
