@@ -20,7 +20,7 @@ LEVELS = [
     ('multidrop', 'SEATTLE', 'Sprawl', (180, 141), 29, 34, 40), # just mor
 
     ('intropolice', 'OAKLAND', 'Police Training', (55, 280), 10, 12, 15), 
-    ('policemaneuver', 'OAKLAND', 'Patrol', (96, 281), 31, 34, 45),
+    ('policemaneuver', 'OAKLAND', 'Patrol', (96, 281), 32, 34, 45),
     ('extrafacts', 'OAKLAND', 'Excess Capacity', (124, 300), 24, 30, 40), # no problem
     ('introturnaround', 'OAKLAND', 'Roundabout', (168, 335), 48, 52, 55),
     ('basicturnaround', 'OAKLAND', 'Tightly Packed', (215, 344), 19, 25, 35),
@@ -51,7 +51,7 @@ LEVELS = [
     ('push2copsaround', 'TEHRAN', 'Standoff', (548, 93), 85, 95, 105), # 5
     ('pods', 'TEHRAN', 'Campus', (602, 130), 58, 70, 85), # 5
     ('dividesoldiers', 'TEHRAN', 'Palace', (662, 90), 100, 110, 130), # 5
-    ('complex2', 'TEHRAN', 'Density', (693, 125), 50, 100, 120), # 5
+    ('complex2', 'TEHRAN', 'Density', (693, 125), 60, 65, 70), # 5
 
     ('towerring', 'MUMBAI', 'Ring', (590, 288), 55, 65, 70), # 5-6
     ('hardsoldierpolice', 'MUMBAI', 'Parade', (615, 324), 70, 80, 90), # 6
@@ -66,7 +66,7 @@ LEVELS = [
     ('tank1', 'NEW YORK CITY', 'Big Gun', (823, 292), 40, 50, 60),
     ('tank2', 'NEW YORK CITY', 'Friendly Fire', (840, 329), 30, 45, 60),
     ('tank3', 'NEW YORK CITY', 'Artillery', (898, 287), 40, 55, 65),
-    ('tank4', 'NEW YORK CITY', 'Martial Law', (919, 339), 50, 100, 120),
+    ('tank4', 'NEW YORK CITY', 'Martial Law', (919, 339), 55, 100, 120),
     ('tank5', 'NEW YORK CITY', 'Smashing Obstacles', (977, 293), 90, 110, 130),
 ]
 # SEATTLE, OAKLAND, SANTIAGO, BARCELONA, ALGIERS, MINSK, TEHRAN, MUMBAI, HONG KONG, NEW YORK CITY

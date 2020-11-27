@@ -486,8 +486,18 @@ class Victory(State):
         self.victory_t = 0
         self.angle = 0
         self.scale = 0
-        self.scene.game.record_victory(self.num_steps)
+        self.num_stars = self.scene.game.record_victory(self.num_steps)
         sound.play_music('victory', 0)
+        self.stars = []
+
+    def add_star(self, filled):
+        x = len(self.stars) * 32 + 120 - 45
+        y = 163
+        s = framesprite.FrameSprite("assets/bigstar.png", 29)
+        s.set_frame((0,1)[filled])
+        s.move(x,y)
+        self.stars.append(s)
+        self.scene.ui_group.add(s)
 
     def update(self, dt):
         self.victory_t += dt
@@ -500,6 +510,22 @@ class Victory(State):
         if self.victory_t > 4.5:
             self.exit()
             self.scene.game.return_to_map(won=True)
+
+        if self.victory_t > 2 and len(self.stars) == 0:
+            if self.num_stars > 0:
+                self.add_star(True)
+            else:
+                self.add_star(False)
+        if self.victory_t > 2.25 and len(self.stars) == 1:
+            if self.num_stars > 1:
+                self.add_star(True)
+            else:
+                self.add_star(False)                
+        if self.victory_t > 2.5 and len(self.stars) == 2:
+            if self.num_stars > 2:
+                self.add_star(True)
+            else:
+                self.add_star(False)                
 
     def take_input(self, input, event):
         if input == "click": 

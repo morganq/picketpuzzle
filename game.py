@@ -143,6 +143,7 @@ class Game:
             if not old_state['beaten'] or steps < old_state['steps'] or stars > old_state['stars']:
                 self.save.set_level_state(self.playing_level_index, True, steps, stars)
                 self.save.save()
+            return stars
 
     def go_to_menu(self):
         self.scene = menuscene.MenuScene(self)
